@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALOK — JEE 2027 Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --surface2: #141b25;
+    --border: rgba(255,255,255,0.06);
+    --accent: #00e5ff;
+    --accent2: #7b61ff;
+    --accent3: #ff6b35;
+    --gold: #ffd166;
+    --green: #06d6a0;
+    --red: #ef233c;
+    --text: #e8edf5;
+    --muted: #5a6a7e;
+    --glow: 0 0 30px rgba(0,229,255,0.15);
+    --glow2: 0 0 30px rgba(123,97,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 72px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 6px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: width 0.3s cubic-bezier(.4,0,.2,1);
+  }
+
+  .sidebar:hover { width: 200px; }
+
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: -1px;
+    padding: 10px 0 20px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .sidebar-logo span { color: var(--text); }
+
+  .nav-item {
+    width: calc(100% - 16px);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .nav-item:hover { background: rgba(0,229,255,0.07); }
+  .nav-item.active { background: rgba(0,229,255,0.12); }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20%; bottom: 20%;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .nav-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.2s 0.05s;
+  }
+
+  .nav-item.active .nav-label { color: var(--accent); }
+  .sidebar:hover .nav-label { opacity: 1; }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: 72px;
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg);
+  }
+
+  /* Grid background */
+  .main::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { display: none; padding: 32px; position: relative; z-index: 1; min-height: 100vh; }
+  .page.active { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent);
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ─── GRID LAYOUTS ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* ─── STAT PILL ─── */
+  .stat-big {
+    font-family: 'Space Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* ─── TAGS ─── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .tag-cyan { background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.2); }
+  .tag-purple { background: rgba(123,97,255,0.1); color: var(--accent2); border: 1px solid rgba(123,97,255,0.2); }
+  .tag-orange { background: rgba(255,107,53,0.1); color: var(--accent3); border: 1px solid rgba(255,107,53,0.2); }
+  .tag-green { background: rgba(6,214,160,0.1); color: var(--green); border: 1px solid rgba(6,214,160,0.2); }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { background: rgba(255,255,255,0.05); border-radius: 999px; height: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { box-shadow: 0 0 20px rgba(0,229,255,0.4); transform: translateY(-1px); }
+  .btn-ghost { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.09); }
+  .btn-danger { background: rgba(239,35,60,0.15); color: var(--red); border: 1px solid rgba(239,35,60,0.2); }
+
+  /* ─── INPUT ─── */
+  input, textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+  }
+  select option { background: var(--surface2); }
+
+  /* ─── DIVIDER ─── */
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ─── COUNTDOWN ─── */
+  .countdown-wrap {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .countdown-unit {
+    text-align: center;
+  }
+  .countdown-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(0,229,255,0.4);
+  }
+  .countdown-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+  .countdown-sep {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    color: var(--muted);
+    padding-bottom: 8px;
+  }
+
+  /* ─── TIMETABLE ─── */
+  .time-slot {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface2);
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .time-slot:hover { border-color: rgba(0,229,255,0.2); transform: translateX(4px); }
+  .time-slot.completed { opacity: 0.5; }
+  .time-slot.completed .slot-subject { text-decoration: line-through; }
+
+  .slot-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 95px;
+  }
+  .slot-subject { font-weight: 500; font-size: 14px; flex: 1; }
+  .slot-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── POMODORO ─── */
+  .pomo-ring {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 0%, rgba(255,255,255,0.05) 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 40px rgba(0,229,255,0.15);
+  }
+  .pomo-ring-inner {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .pomo-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .pomo-mode { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  .pomo-controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+
+  .pomo-session-list { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; }
+  .pomo-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+  .pomo-dot.done { background: var(--accent); }
+
+  /* ─── HEATMAP ─── */
+  .heatmap { display: flex; gap: 3px; flex-wrap: wrap; }
+  .heatmap-cell {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .heatmap-cell:hover { transform: scale(1.3); }
+  .heatmap-cell.h1 { background: rgba(0,229,255,0.2); }
+  .heatmap-cell.h2 { background: rgba(0,229,255,0.4); }
+  .heatmap-cell.h3 { background: rgba(0,229,255,0.65); }
+  .heatmap-cell.h4 { background: rgba(0,229,255,0.9); }
+
+  /* ─── NOTES ─── */
+  .note-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .note-card:hover { border-color: rgba(0,229,255,0.15); }
+  .note-card.pinned { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.04); }
+  .note-subj-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+  .note-text { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.75); }
+  .note-date { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .note-pin {
+    position: absolute;
+    top: 12px; right: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .note-pin:hover { opacity: 1; }
+  .note-card.pinned .note-pin { opacity: 1; }
+
+  /* ─── CHECKLIST ─── */
+  .topic-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .topic-item:last-child { border: none; }
+  .topic-check {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+  .topic-item.done .topic-check { background: var(--green); border-color: var(--green); }
+  .topic-item.done .topic-name { text-decoration: line-through; color: var(--muted); }
+  .topic-name { font-size: 13px; flex: 1; }
+  .topic-subj { font-size: 11px; color: var(--muted); }
+
+  /* ─── STREAK ─── */
+  .streak-fire {
+    font-size: 48px;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(255,107,53,0.6));
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    width: 380px;
+    max-width: 90vw;
+    animation: fadeUp 0.3s ease;
+  }
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ─── MOTIVATIONAL QUOTE ─── */
+  .quote-card {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(123,97,255,0.06));
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 16px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-mark {
+    position: absolute;
+    top: -10px; left: 16px;
+    font-size: 80px;
+    color: rgba(0,229,255,0.08);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .quote-text {
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-author { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  /* ─── SUBJECTS COLORS ─── */
+  .phys { background: rgba(0,229,255,0.15); color: var(--accent); }
+  .chem { background: rgba(123,97,255,0.15); color: var(--accent2); }
+  .math { background: rgba(255,107,53,0.15); color: var(--accent3); }
+
+  .dot-phys { background: var(--accent); }
+  .dot-chem { background: var(--accent2); }
+  .dot-math { background: var(--accent3); }
+  .dot-break { background: var(--green); }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .page { padding: 20px 16px; }
+    .countdown-num { font-size: 30px; }
+    .stat-big { font-size: 26px; }
+    .sidebar { width: 56px; }
+    .main { margin-left: 56px; }
+  }
+
+  /* Glow accent orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: 10%; }
+  .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: 10%; left: 15%; }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%; top: 110%;
+    transform: translateX(-50%);
+    background: #1e2733;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 99;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">A<span>2027</span></div>
+  <div class="nav-item active" onclick="goTo('home')">
+    <span class="nav-icon">⚡</span>
+    <span class="nav-label">Dashboard</span>
+  </div>
+  <div class="nav-item" onclick="goTo('timetable')">
+    <span class="nav-icon">🗓️</span>
+    <span class="nav-label">Timetable</span>
+  </div>
+  <div class="nav-item" onclick="goTo('pomodoro')">
+    <span class="nav-icon">⏱️</span>
+    <span class="nav-label">Focus Timer</span>
+  </div>
+  <div class="nav-item" onclick="goTo('progress')">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Progress</span>
+  </div>
+  <div class="nav-item" onclick="goTo('topics')">
+    <span class="nav-icon">✅</span>
+    <span class="nav-label">Topics</span>
+  </div>
+  <div class="nav-item" onclick="goTo('notes')">
+    <span class="nav-icon">📝</span>
+    <span class="nav-label">Notes</span>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+
+  <!-- ══════════════ HOME PAGE ══════════════ -->
+  <div class="page active" id="page-home">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px;">
+      <div>
+        <div class="page-title">Hey, Alok 👋</div>
+        <div class="page-sub">JEE 2027 — Keep pushing. IIT Delhi CSE is yours.</div>
+      </div>
+      <div id="live-clock" style="font-family:'Space Mono',monospace;font-size:14px;color:var(--muted);text-align:right;"></div>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="quote-card" style="margin-bottom:20px;">
+      <div class="quote-mark">"</div>
+      <div class="quote-text" id="daily-quote">Loading motivation...</div>
+      <div class="quote-author" id="quote-author"></div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">Streak</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="streak-fire">🔥</div>
+          <div>
+            <div class="stat-big" style="color:var(--accent3);" id="streak-count">0</div>
+            <div class="stat-label">Days</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Today's Study</div>
+        <div class="stat-big" style="color:var(--accent);" id="today-hours">0h 0m</div>
+        <div class="stat-label">Focused time</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Topics Done</div>
+        <div class="stat-big" style="color:var(--green);" id="topics-done-count">0</div>
+        <div class="stat-label">This week</div>
+      </div>
+      <div class="card">
+        <div class="card-title">JEE 2027 In</div>
+        <div class="stat-big" style="color:var(--gold);" id="days-left">—</div>
+        <div class="stat-label">Days remaining</div>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN + TODAY SCHEDULE -->
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">Countdown to JEE Advanced 2027</div>
+        <div class="countdown-wrap" id="countdown-home">
+          <div class="countdown-unit"><div class="countdown-num" id="cd-d">000</div><div class="countdown-label">Days</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><div class="countdown-num" id="cd-h">00</div><div class="countdown-label">Hours</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><div class="countdown-num" id="cd-m">00</div><div class="countdown-label">Mins</div></div>
+          <div class="countdown-sep">:</div>
+          <div class="countdown-unit"><div class="countdown-num" id="cd-s">00</div><div class="countdown-label">Secs</div></div>
+        </div>
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Target: JEE Mains 250+ | Advanced 300+</div>
+          <div class="progress-wrap">
+            <div class="progress-fill" style="width:12%;background:linear-gradient(90deg,var(--accent2),var(--accent));"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Today's Schedule</div>
+        <div id="today-slots" style="max-height:220px;overflow-y:auto;"></div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:12px;font-size:12px;" onclick="goTo('timetable')">View Full Timetable →</button>
+      </div>
+    </div>
+
+    <!-- SUBJECT PROGRESS MINI -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">Subject Progress</div>
+      <div class="grid-3">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:500;">⚡ Physics</span>
+            <span class="tag tag-cyan" id="phys-pct">0%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" id="phys-bar" style="background:var(--accent);width:0%;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:500;">🧪 Chemistry</span>
+            <span class="tag tag-purple" id="chem-pct">0%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" id="chem-bar" style="background:var(--accent2);width:0%;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:500;">📐 Math</span>
+            <span class="tag tag-orange" id="math-pct">0%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" id="math-bar" style="background:var(--accent3);width:0%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ TIMETABLE PAGE ══════════════ -->
+  <div class="page" id="page-timetable">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="page-title">Timetable 🗓️</div>
+      <button class="btn btn-primary" onclick="openSlotModal()">+ Add Slot</button>
+    </div>
+    <div class="page-sub">Click on a slot to mark it done. Plan your Allen + self-study time.</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">🌅 Morning</div>
+          <div id="slot-morning"></div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div class="card-title">☀️ Afternoon</div>
+          <div id="slot-afternoon"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">🌆 Evening</div>
+          <div id="slot-evening"></div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <div class="card-title">🌙 Night</div>
+          <div id="slot-night"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ POMODORO PAGE ══════════════ -->
+  <div class="page" id="page-pomodoro">
+    <div class="page-title">Focus Timer ⏱️</div>
+    <div class="page-sub">Stay locked in. 25 min grind, 5 min breathe.</div>
+
+    <div class="grid-2">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Pomodoro</div>
+        <div class="pomo-ring" id="pomo-ring">
+          <div class="pomo-ring-inner">
+            <div class="pomo-time" id="pomo-display">25:00</div>
+            <div class="pomo-mode" id="pomo-mode-label">FOCUS</div>
+          </div>
+        </div>
+
+        <div class="pomo-session-list" id="pomo-sessions"></div>
+
+        <div style="margin-bottom:16px;">
+          <label class="form-label">Current Subject</label>
+          <select id="pomo-subject" style="max-width:200px;margin:0 auto;">
+            <option value="Physics">⚡ Physics</option>
+            <option value="Chemistry">🧪 Chemistry</option>
+            <option value="Math">📐 Math</option>
+          </select>
+        </div>
+
+        <div class="pomo-controls">
+          <button class="btn btn-ghost" onclick="pomoPrev()">⏮</button>
+          <button class="btn btn-primary" id="pomo-btn" onclick="togglePomo()">▶ Start</button>
+          <button class="btn btn-ghost" onclick="pomoReset()">↺ Reset</button>
+        </div>
+
+        <div style="display:flex;gap:24px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+          <div>
+            <div class="form-label" style="text-align:center;">Focus (min)</div>
+            <input type="number" id="pomo-focus-len" value="25" min="1" max="90" style="width:80px;text-align:center;" onchange="pomoReset()">
+          </div>
+          <div>
+            <div class="form-label" style="text-align:center;">Break (min)</div>
+            <input type="number" id="pomo-break-len" value="5" min="1" max="30" style="width:80px;text-align:center;" onchange="pomoReset()">
+          </div>
+          <div>
+            <div class="form-label" style="text-align:center;">Long Break (min)</div>
+            <input type="number" id="pomo-long-len" value="15" min="5" max="60" style="width:80px;text-align:center;" onchange="pomoReset()">
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-title">Today's Focus Log</div>
+          <div id="pomo-log" style="max-height:200px;overflow-y:auto;"></div>
+          <div class="divider"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--muted);">Total today</span>
+            <span class="stat-big" style="font-size:22px;color:var(--accent);" id="total-focus-display">0h 0m</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Subject Distribution</div>
+          <div id="subj-dist" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PROGRESS PAGE ══════════════ -->
+  <div class="page" id="page-progress">
+    <div class="page-title">Progress 📊</div>
+    <div class="page-sub">Visual proof of your grind. Every day counts.</div>
+
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">Physics</div>
+        <div style="text-align:center;margin:12px 0;">
+          <div style="font-size:48px;font-family:'Space Mono';color:var(--accent);" id="prog-phys-pct">0%</div>
+          <div class="progress-wrap" style="margin-top:12px;height:8px;">
+            <div class="progress-fill" id="prog-phys-bar" style="background:linear-gradient(90deg,var(--accent2),var(--accent));width:0%;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="changeProgress('phys',-5)">−5%</button>
+          <button class="btn btn-primary" style="flex:1;font-size:12px;" onclick="changeProgress('phys',5)">+5%</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Chemistry</div>
+        <div style="text-align:center;margin:12px 0;">
+          <div style="font-size:48px;font-family:'Space Mono';color:var(--accent2);" id="prog-chem-pct">0%</div>
+          <div class="progress-wrap" style="margin-top:12px;height:8px;">
+            <div class="progress-fill" id="prog-chem-bar" style="background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="changeProgress('chem',-5)">−5%</button>
+          <button class="btn btn-primary" style="flex:1;font-size:12px;" onclick="changeProgress('chem',5)">+5%</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Math</div>
+        <div style="text-align:center;margin:12px 0;">
+          <div style="font-size:48px;font-family:'Space Mono';color:var(--accent3);" id="prog-math-pct">0%</div>
+          <div class="progress-wrap" style="margin-top:12px;height:8px;">
+            <div class="progress-fill" id="prog-math-bar" style="background:linear-gradient(90deg,var(--gold),var(--accent3));width:0%;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-ghost" style="flex:1;font-size:12px;" onclick="changeProgress('math',-5)">−5%</button>
+          <button class="btn btn-primary" style="flex:1;font-size:12px;" onclick="changeProgress('math',5)">+5%</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="card-title" style="margin:0;">Study Heatmap — 2025–2027</div>
+        <div style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted);">
+          Less
+          <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,0.04);"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,229,255,0.2);"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,229,255,0.5);"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,229,255,0.9);"></div>
+          More
+        </div>
+      </div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ TOPICS PAGE ══════════════ -->
+  <div class="page" id="page-topics">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="page-title">Topics Checklist ✅</div>
+      <button class="btn btn-primary" onclick="openTopicModal()">+ Add Topic</button>
+    </div>
+    <div class="page-sub">Track every chapter. IIT Delhi CSE — one topic at a time.</div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title" style="color:var(--accent);">⚡ Physics</div>
+        <div id="topics-phys"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--accent2);">🧪 Chemistry</div>
+        <div id="topics-chem"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--accent3);">📐 Math</div>
+        <div id="topics-math"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ NOTES PAGE ══════════════ -->
+  <div class="page" id="page-notes">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div class="page-title">Quick Notes 📝</div>
+      <button class="btn btn-primary" onclick="openNoteModal()">+ Add Note</button>
+    </div>
+    <div class="page-sub">Formulas, doubts, key points — everything in one place.</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="filterNotes('all')">All</button>
+      <button class="btn btn-ghost" onclick="filterNotes('Physics')">⚡ Physics</button>
+      <button class="btn btn-ghost" onclick="filterNotes('Chemistry')">🧪 Chemistry</button>
+      <button class="btn btn-ghost" onclick="filterNotes('Math')">📐 Math</button>
+      <button class="btn btn-ghost" onclick="filterNotes('General')">📌 General</button>
+    </div>
+
+    <div id="notes-grid" style="columns:2;gap:16px;"></div>
+  </div>
+
+</main>
+
+<!-- ─── MODALS ─── -->
+
+<!-- Add Slot Modal -->
+<div class="modal-overlay" id="modal-slot">
+  <div class="modal">
+    <div class="modal-title">Add Time Slot</div>
+    <div class="form-group">
+      <label class="form-label">Start Time</label>
+      <input type="time" id="slot-start">
+    </div>
+    <div class="form-group">
+      <label class="form-label">End Time</label>
+      <input type="time" id="slot-end">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subject / Activity</label>
+      <input type="text" id="slot-subj" placeholder="e.g. Physics — Kinematics">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select id="slot-type">
+        <option value="Physics">⚡ Physics</option>
+        <option value="Chemistry">🧪 Chemistry</option>
+        <option value="Math">📐 Math</option>
+        <option value="Break">☕ Break</option>
+        <option value="Allen">🏫 Allen Class</option>
+        <option value="Revision">🔄 Revision</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Session</label>
+      <select id="slot-session">
+        <option value="morning">Morning</option>
+        <option value="afternoon">Afternoon</option>
+        <option value="evening">Evening</option>
+        <option value="night">Night</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="saveSlot()">Add Slot</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModals()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Topic Modal -->
+<div class="modal-overlay" id="modal-topic">
+  <div class="modal">
+    <div class="modal-title">Add Topic</div>
+    <div class="form-group">
+      <label class="form-label">Topic Name</label>
+      <input type="text" id="topic-name-input" placeholder="e.g. Wavy Curve Method">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subject</label>
+      <select id="topic-subj-input">
+        <option value="phys">⚡ Physics</option>
+        <option value="chem">🧪 Chemistry</option>
+        <option value="math">📐 Math</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="saveTopic()">Add</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModals()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal">
+    <div class="modal-title">Quick Note</div>
+    <div class="form-group">
+      <label class="form-label">Subject</label>
+      <select id="note-subj-input">
+        <option value="Physics">⚡ Physics</option>
+        <option value="Chemistry">🧪 Chemistry</option>
+        <option value="Math">📐 Math</option>
+        <option value="General">📌 General</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <textarea id="note-text-input" rows="4" placeholder="Write formulas, key points, doubts..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="saveNote()">Save Note</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModals()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIO for timer -->
+<audio id="ding" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdIiVmJOJe3Jyf5KkraqcjX+Bk6ivsa+mjH57ipyjqairnoiAgZatubm1qJSJjqKxs66hdHiVs8bKw7CHhJiuvLyumHp1ip2vtrCifXuFl6StrqiXiYqWpLCurqSVi4+drK2rpZaKi5ejrbGwqZqNi5Wjq62ppZqQkZyorauppZqSk52mrK6opZ2VlZyiq6+tp5+XlJmgqK2tqKKblJaapquvq6ObmJicoaqvr6qjmpqXm6Sqr7CrpJ2YmZukqqyvqqOfm5udpKuvsaykn5ybnaOqr7KrpaCcmp2ipK+yr6igm5udoaarvLGsp52amZycoquwsquhnJmWnKSmrrOrpJ6bl5qhpaquq6WYPQ=="></audio>
+
+<script>
+// ════════════════════════════════
+// DATA STORE (localStorage)
+// ════════════════════════════════
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let slots = load('slots', [
+  { id:1, start:'05:30', end:'07:00', subject:'Morning Revision', type:'Revision', session:'morning', done:false },
+  { id:2, start:'07:00', end:'09:00', subject:'Allen Class — Physics', type:'Allen', session:'morning', done:false },
+  { id:3, start:'09:30', end:'11:30', subject:'Self Study — Chemistry NCERT', type:'Chemistry', session:'morning', done:false },
+  { id:4, start:'12:00', end:'13:00', subject:'Lunch + Rest', type:'Break', session:'afternoon', done:false },
+  { id:5, start:'13:00', end:'15:00', subject:'Allen Class — Math', type:'Allen', session:'afternoon', done:false },
+  { id:6, start:'15:30', end:'17:30', subject:'Self Study — Physics', type:'Physics', session:'afternoon', done:false },
+  { id:7, start:'18:00', end:'19:00', subject:'Exercise + Freshen Up', type:'Break', session:'evening', done:false },
+  { id:8, start:'19:00', end:'21:00', subject:'Self Study — Math Problems', type:'Math', session:'evening', done:false },
+  { id:9, start:'21:30', end:'23:00', subject:'Night Revision + Formula', type:'Revision', session:'night', done:false },
+  { id:10, start:'23:00', end:'23:30', subject:'Next Day Planning', type:'Break', session:'night', done:false },
+]);
+
+let topics = load('topics', {
+  phys: [
+    {id:1,name:'Kinematics',done:false},{id:2,name:'Laws of Motion',done:false},
+    {id:3,name:'Work Energy Power',done:false},{id:4,name:'Gravitation',done:false},
+    {id:5,name:'Electrostatics',done:false},{id:6,name:'Current Electricity',done:false},
+    {id:7,name:'Optics',done:false},{id:8,name:'Modern Physics',done:false}
+  ],
+  chem: [
+    {id:1,name:'Mole Concept',done:false},{id:2,name:'Atomic Structure',done:false},
+    {id:3,name:'Periodic Table',done:false},{id:4,name:'Chemical Bonding',done:false},
+    {id:5,name:'Organic — GOC',done:false},{id:6,name:'Thermodynamics',done:false},
+    {id:7,name:'Electrochemistry',done:false},{id:8,name:'Coordination Compounds',done:false}
+  ],
+  math: [
+    {id:1,name:'Quadratic Equations',done:false},{id:2,name:'Wavy Curve Method',done:false},
+    {id:3,name:'Coordinate Geometry',done:false},{id:4,name:'Limits & Continuity',done:false},
+    {id:5,name:'Differentiation',done:false},{id:6,name:'Integration',done:false},
+    {id:7,name:'Matrices & Determinants',done:false},{id:8,name:'Probability',done:false}
+  ]
+});
+
+let progress = load('progress', { phys:0, chem:0, math:0 });
+let notes = load('notes', [
+  { id:1, subject:'Math', text:'Wavy Curve: roots pe sign badlega, bracket rules: ( excluded, [ included. Critical points pe check karo.', pinned:true, date:'Apr 2025' },
+  { id:2, subject:'Chemistry', text:'n+l rule: lower n+l = lower energy. Tie breaker: lower n. Order: 1s 2s 2p 3s 3p 4s 3d 4p...', pinned:false, date:'Apr 2025' },
+  { id:3, subject:'Physics', text:'v = u + at | s = ut + ½at² | v² = u² + 2as. Remember sign convention!', pinned:true, date:'Apr 2025' },
+]);
+
+let pomoDone = load('pomo-done', 0);
+let pomoCycle = 0; // 0-3 focus sessions
+let pomoIsBreak = false;
+let pomoTimer = null;
+let pomoSecs = 0;
+let totalFocusSecs = load('focus-secs-'+today(), 0);
+let focusLog = load('focus-log-'+today(), []);
+let subjFocus = load('subj-focus-'+today(), { Physics:0, Chemistry:0, Math:0 });
+let streak = load('streak', 0);
+let lastStudyDay = load('last-study-day', '');
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const items = document.querySelectorAll('.nav-item');
+  const map = ['home','timetable','pomodoro','progress','topics','notes'];
+  items[map.indexOf(page)]?.classList.add('active');
+  if(page==='home') renderHome();
+  if(page==='timetable') renderTimetable();
+  if(page==='progress') { renderProgress(); renderHeatmap(); }
+  if(page==='topics') renderTopics();
+  if(page==='notes') renderNotes();
+  if(page==='pomodoro') renderPomoLog();
+}
+
+// ════════════════════════════════
+// CLOCK + COUNTDOWN
+// ════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('live-clock').innerHTML =
+    `<div style="font-size:20px;color:var(--accent)">${h}:${m}:${s}</div><div>${days[now.getDay()]}, ${now.toLocaleDateString('en-IN')}</div>`;
+
+  // Countdown to JEE Advanced 2027 (approx May 25, 2027)
+  const target = new Date('2027-05-25T09:00:00');
+  const diff = target - now;
+  if(diff > 0) {
+    const dd = Math.floor(diff/864e5);
+    const dh = Math.floor((diff%864e5)/36e5);
+    const dm = Math.floor((diff%36e5)/6e4);
+    const ds = Math.floor((diff%6e4)/1e3);
+    ['cd-d','cd-h','cd-m','cd-s'].forEach((id,i) => {
+      const v = [dd,dh,dm,ds][i];
+      document.getElementById(id).textContent = String(v).padStart(i===0?3:2,'0');
+    });
+    document.getElementById('days-left').textContent = dd;
+  }
+}
+
+// ════════════════════════════════
+// QUOTES
+// ════════════════════════════════
+const quotes = [
+  { text: "Pain is temporary. IIT Delhi is forever.", author: "— Your future self" },
+  { text: "The grind you put in today is the gap between you and the rest.", author: "— Anonymous JEE Topper" },
+  { text: "Talent is a starting point. Consistency is the destination.", author: "— Allen Kota wisdom" },
+  { text: "One more hour of study today. One step closer to IIT Delhi CSE.", author: "— Alok 2027" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "— Tim Notke" },
+  { text: "A year from now, you'll wish you had started today. You already did.", author: "— Karen Lamb" },
+  { text: "Choti choti jeetein daily target complete karo. Badi jeet aayegi khud.", author: "— JEE Wisdom" },
+  { text: "The secret of getting ahead is getting started.", author: "— Mark Twain" },
+];
+
+function setQuote() {
+  const q = quotes[new Date().getDate() % quotes.length];
+  document.getElementById('daily-quote').textContent = q.text;
+  document.getElementById('quote-author').textContent = q.author;
+}
+
+// ════════════════════════════════
+// HOME
+// ════════════════════════════════
+function renderHome() {
+  // Streak
+  document.getElementById('streak-count').textContent = streak;
+  // Hours
+  const h = Math.floor(totalFocusSecs/3600);
+  const m = Math.floor((totalFocusSecs%3600)/60);
+  document.getElementById('today-hours').textContent = `${h}h ${m}m`;
+  // Topics done this week
+  const done = Object.values(topics).flat().filter(t=>t.done).length;
+  document.getElementById('topics-done-count').textContent = done;
+  // Subject progress
+  ['phys','chem','math'].forEach(s => {
+    const pct = progress[s];
+    document.getElementById(`${s}-pct`).textContent = pct+'%';
+    document.getElementById(`${s}-bar`).style.width = pct+'%';
+  });
+  // Today's slots (next upcoming)
+  const now = new Date();
+  const nowStr = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const todaySlots = [...slots].sort((a,b)=>a.start.localeCompare(b.start)).slice(0,6);
+  const cont = document.getElementById('today-slots');
+  cont.innerHTML = todaySlots.map(s => `
+    <div class="time-slot ${s.done?'completed':''}">
+      <div class="slot-dot dot-${typeColor(s.type)}"></div>
+      <div class="slot-time">${s.start}–${s.end}</div>
+      <div class="slot-subject">${s.subject}</div>
+    </div>
+  `).join('');
+}
+
+function typeColor(t) {
+  if(t==='Physics'||t==='Allen') return 'phys';
+  if(t==='Chemistry') return 'chem';
+  if(t==='Math') return 'math';
+  return 'break';
+}
+
+// ════════════════════════════════
+// TIMETABLE
+// ════════════════════════════════
+function renderTimetable() {
+  ['morning','afternoon','evening','night'].forEach(sess => {
+    const cont = document.getElementById('slot-'+sess);
+    const sessSlots = slots.filter(s=>s.session===sess).sort((a,b)=>a.start.localeCompare(b.start));
+    cont.innerHTML = sessSlots.length ? sessSlots.map(s => `
+      <div class="time-slot ${s.done?'completed':''}" onclick="toggleSlot(${s.id})">
+        <div class="slot-dot dot-${typeColor(s.type)}"></div>
+        <div class="slot-time">${s.start}–${s.end}</div>
+        <div class="slot-subject">${s.subject}</div>
+        <div style="font-size:18px;">${s.done?'✅':''}</div>
+      </div>
+    `).join('') : '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No slots yet. Add one!</div>';
+  });
+}
+
+function toggleSlot(id) {
+  const s = slots.find(x=>x.id===id);
+  if(s) { s.done = !s.done; save('slots', slots); renderTimetable(); renderHome(); }
+}
+
+function openSlotModal() { document.getElementById('modal-slot').classList.add('open'); }
+
+function saveSlot() {
+  const s = document.getElementById('slot-start').value;
+  const e = document.getElementById('slot-end').value;
+  const subj = document.getElementById('slot-subj').value.trim();
+  const type = document.getElementById('slot-type').value;
+  const sess = document.getElementById('slot-session').value;
+  if(!s||!e||!subj) return alert('Fill all fields!');
+  slots.push({ id: Date.now(), start:s, end:e, subject:subj, type, session:sess, done:false });
+  save('slots', slots);
+  closeModals();
+  renderTimetable();
+}
+
+// ════════════════════════════════
+// POMODORO
+// ════════════════════════════════
+function getFocusLen() { return (parseInt(document.getElementById('pomo-focus-len').value)||25)*60; }
+function getBreakLen() { return (parseInt(document.getElementById('pomo-break-len').value)||5)*60; }
+function getLongLen() { return (parseInt(document.getElementById('pomo-long-len').value)||15)*60; }
+
+function initPomo() {
+  pomoSecs = getFocusLen();
+  pomoIsBreak = false;
+  updatePomoDisplay();
+  renderPomoDots();
+}
+
+function togglePomo() {
+  if(pomoTimer) {
+    clearInterval(pomoTimer);
+    pomoTimer = null;
+    document.getElementById('pomo-btn').textContent = '▶ Resume';
+  } else {
+    pomoTimer = setInterval(tickPomo, 1000);
+    document.getElementById('pomo-btn').textContent = '⏸ Pause';
+  }
+}
+
+function tickPomo() {
+  if(pomoSecs <= 0) {
+    playDing();
+    if(!pomoIsBreak) {
+      // Focus done
+      pomoCycle++;
+      const subj = document.getElementById('pomo-subject').value;
+      const mins = getFocusLen()/60;
+      const focusSecs = getFocusLen();
+      totalFocusSecs += focusSecs;
+      subjFocus[subj] = (subjFocus[subj]||0) + focusSecs;
+      focusLog.push({ time: new Date().toLocaleTimeString(), subj, mins });
+      save('focus-secs-'+today(), totalFocusSecs);
+      save('subj-focus-'+today(), subjFocus);
+      save('focus-log-'+today(), focusLog);
+      // Update streak
+      if(lastStudyDay !== today()) { streak++; lastStudyDay = today(); save('streak',streak); save('last-study-day',lastStudyDay); }
+      pomoIsBreak = true;
+      pomoSecs = (pomoCycle % 4 === 0) ? getLongLen() : getBreakLen();
+      document.getElementById('pomo-mode-label').textContent = pomoCycle%4===0?'LONG BREAK':'SHORT BREAK';
+      renderPomoLog();
+    } else {
+      pomoIsBreak = false;
+      pomoSecs = getFocusLen();
+      document.getElementById('pomo-mode-label').textContent = 'FOCUS';
+    }
+    renderPomoDots();
+    updatePomoDisplay();
+    return;
+  }
+  pomoSecs--;
+  if(!pomoIsBreak) {
+    totalFocusSecs++;
+    save('focus-secs-'+today(), totalFocusSecs);
+  }
+  updatePomoDisplay();
+  updatePomoRing();
+}
+
+function updatePomoDisplay() {
+  const m = String(Math.floor(pomoSecs/60)).padStart(2,'0');
+  const s = String(pomoSecs%60).padStart(2,'0');
+  document.getElementById('pomo-display').textContent = `${m}:${s}`;
+  const h2 = Math.floor(totalFocusSecs/3600);
+  const m2 = Math.floor((totalFocusSecs%3600)/60);
+  const el = document.getElementById('total-focus-display');
+  if(el) el.textContent = `${h2}h ${m2}m`;
+}
+
+function updatePomoRing() {
+  const total = pomoIsBreak ? (pomoCycle%4===0?getLongLen():getBreakLen()) : getFocusLen();
+  const pct = ((total - pomoSecs) / total) * 100;
+  const color = pomoIsBreak ? 'var(--green)' : 'var(--accent)';
+  document.getElementById('pomo-ring').style.background =
+    `conic-gradient(${color} ${pct}%, rgba(255,255,255,0.04) ${pct}%)`;
+}
+
+function renderPomoDots() {
+  const cont = document.getElementById('pomo-sessions');
+  cont.innerHTML = Array.from({length:4},(_,i)=>
+    `<div class="pomo-dot ${i < (pomoCycle%4)?'done':''}"></div>`
+  ).join('');
+}
+
+function pomoReset() {
+  clearInterval(pomoTimer); pomoTimer=null;
+  pomoCycle=0; pomoIsBreak=false;
+  initPomo();
+  document.getElementById('pomo-btn').textContent = '▶ Start';
+  document.getElementById('pomo-mode-label').textContent = 'FOCUS';
+  document.getElementById('pomo-ring').style.background = 'conic-gradient(var(--accent) 0%, rgba(255,255,255,0.05) 0%)';
+}
+
+function pomoPrev() { pomoReset(); }
+
+function renderPomoLog() {
+  const cont = document.getElementById('pomo-log');
+  if(!cont) return;
+  if(!focusLog.length) { cont.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No sessions yet. Start grinding!</div>'; }
+  else cont.innerHTML = [...focusLog].reverse().map(f=>
+    `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span>${f.time}</span>
+      <span class="tag tag-${f.subj==='Physics'?'cyan':f.subj==='Chemistry'?'purple':'orange'}">${f.subj}</span>
+      <span style="color:var(--muted)">${f.mins}m</span>
+    </div>`
+  ).join('');
+
+  // Subject distribution
+  const dist = document.getElementById('subj-dist');
+  if(dist) {
+    const total = Object.values(subjFocus).reduce((a,b)=>a+b,0)||1;
+    dist.innerHTML = Object.entries(subjFocus).map(([s,v])=>`
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <span style="font-size:13px;">${s}</span>
+          <span style="font-size:12px;color:var(--muted)">${Math.floor(v/60)}m</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-fill" style="width:${(v/total*100).toFixed(1)}%;background:${s==='Physics'?'var(--accent)':s==='Chemistry'?'var(--accent2)':'var(--accent3)'};"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+  updatePomoDisplay();
+}
+
+function playDing() {
+  try { new Audio("data:audio/wav;base64,UklGRl9vT1dBVkVmbXQiBAAAAFAAAAAQABAAIAAAAFAAAAAQAAQAZGF0YQ==").play(); } catch {}
+}
+
+// ════════════════════════════════
+// PROGRESS
+// ════════════════════════════════
+function renderProgress() {
+  ['phys','chem','math'].forEach(s => {
+    const pct = progress[s];
+    document.getElementById(`prog-${s}-pct`).textContent = pct+'%';
+    document.getElementById(`prog-${s}-bar`).style.width = pct+'%';
+  });
+}
+
+function changeProgress(subj, delta) {
+  progress[subj] = Math.min(100, Math.max(0, (progress[subj]||0) + delta));
+  save('progress', progress);
+  renderProgress();
+  renderHome();
+  // Update home bars
+  ['phys','chem','math'].forEach(s => {
+    const el1 = document.getElementById(`${s}-pct`);
+    const el2 = document.getElementById(`${s}-bar`);
+    if(el1) el1.textContent = progress[s]+'%';
+    if(el2) el2.style.width = progress[s]+'%';
+  });
+}
+
+function renderHeatmap() {
+  const cont = document.getElementById('heatmap');
+  const cells = 365;
+  // Simulate some data from localStorage or random for past
+  let heatData = load('heatmap-data', null);
+  if(!heatData) {
+    heatData = Array.from({length:cells},(_,i) => {
+      if(i > cells - 30) return Math.random() < 0.6 ? Math.ceil(Math.random()*4) : 0;
+      if(i > cells - 100) return Math.random() < 0.3 ? Math.ceil(Math.random()*3) : 0;
+      return 0;
+    });
+    save('heatmap-data', heatData);
+  }
+  cont.innerHTML = heatData.map((v,i) =>
+    `<div class="heatmap-cell ${v?'h'+v:''}" data-tip="${v?v+' sessions':'No study'}" onclick="toggleHeatCell(${i})"></div>`
+  ).join('');
+}
+
+function toggleHeatCell(idx) {
+  let heatData = load('heatmap-data', []);
+  heatData[idx] = (heatData[idx]||0) < 4 ? (heatData[idx]||0)+1 : 0;
+  save('heatmap-data', heatData);
+  renderHeatmap();
+}
+
+// ════════════════════════════════
+// TOPICS
+// ════════════════════════════════
+function renderTopics() {
+  ['phys','chem','math'].forEach(s => {
+    const cont = document.getElementById('topics-'+s);
+    const done = topics[s].filter(t=>t.done).length;
+    const total = topics[s].length;
+    cont.innerHTML = `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;">
+          <span>${done}/${total} done</span>
+          <span>${Math.round(done/total*100)}%</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${Math.round(done/total*100)}%;background:${s==='phys'?'var(--accent)':s==='chem'?'var(--accent2)':'var(--accent3)'};"></div></div>
+      </div>
+    ` + topics[s].map(t => `
+      <div class="topic-item ${t.done?'done':''}" onclick="toggleTopic('${s}',${t.id})">
+        <div class="topic-check">${t.done?'✓':''}</div>
+        <div class="topic-name">${t.name}</div>
+      </div>
+    `).join('');
+  });
+}
+
+function toggleTopic(subj, id) {
+  const t = topics[subj].find(x=>x.id===id);
+  if(t) { t.done = !t.done; save('topics', topics); renderTopics(); renderHome(); }
+}
+
+function openTopicModal() { document.getElementById('modal-topic').classList.add('open'); }
+
+function saveTopic() {
+  const name = document.getElementById('topic-name-input').value.trim();
+  const subj = document.getElementById('topic-subj-input').value;
+  if(!name) return;
+  topics[subj].push({ id: Date.now(), name, done:false });
+  save('topics', topics);
+  closeModals();
+  renderTopics();
+}
+
+// ════════════════════════════════
+// NOTES
+// ════════════════════════════════
+let noteFilter = 'all';
+function filterNotes(f) { noteFilter = f; renderNotes(); }
+
+function renderNotes() {
+  const cont = document.getElementById('notes-grid');
+  let filtered = notes.filter(n => noteFilter==='all' || n.subject===noteFilter);
+  filtered.sort((a,b) => (b.pinned?1:0)-(a.pinned?1:0));
+  cont.innerHTML = filtered.map(n => `
+    <div class="note-card ${n.pinned?'pinned':''}" style="break-inside:avoid;margin-bottom:16px;">
+      <div class="note-pin" onclick="togglePin(${n.id})">${n.pinned?'📌':'📍'}</div>
+      <div class="note-subj-badge ${n.subject==='Physics'?'phys':n.subject==='Chemistry'?'chem':n.subject==='Math'?'math':'tag-green'}">${n.subject}</div>
+      <div class="note-text">${n.text}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+        <div class="note-date">${n.date}</div>
+        <div style="cursor:pointer;font-size:13px;color:var(--red);" onclick="deleteNote(${n.id})">🗑</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:13px;padding:20px 0;">No notes here yet!</div>';
+}
+
+function togglePin(id) {
+  const n = notes.find(x=>x.id===id);
+  if(n) { n.pinned = !n.pinned; save('notes', notes); renderNotes(); }
+}
+
+function deleteNote(id) {
+  notes = notes.filter(x=>x.id!==id);
+  save('notes', notes);
+  renderNotes();
+}
+
+function openNoteModal() { document.getElementById('modal-note').classList.add('open'); }
+
+function saveNote() {
+  const subj = document.getElementById('note-subj-input').value;
+  const text = document.getElementById('note-text-input').value.trim();
+  if(!text) return;
+  const now = new Date();
+  notes.push({ id:Date.now(), subject:subj, text, pinned:false, date: now.toLocaleDateString('en-IN',{month:'short',year:'numeric'}) });
+  save('notes', notes);
+  document.getElementById('note-text-input').value = '';
+  closeModals();
+  renderNotes();
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));
+}
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+setQuote();
+initPomo();
+renderHome();
+renderPomoDots();
+setInterval(updateClock, 1000);
+updateClock();
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) closeModals(); });
+});
+</script>
+</body>
+</html>
